@@ -1,6 +1,6 @@
 import pytest
 import re
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, expect, Browser
 
 
 @pytest.mark.basic
@@ -23,7 +23,11 @@ def test_get_started_link(page: Page):
 
 
 @pytest.mark.search
-def test_duckduckgo_search(page: Page):
+def test_duckduckgo_search(page: Page, browser: Browser):
+
+    context = browser.new_context(record_video_dir="videos/")
+    page = context.new_page()
+
     # Go to the DuckDuckGo homepage.
     page.goto("https://duckduckgo.com/")
 
@@ -38,6 +42,9 @@ def test_duckduckgo_search(page: Page):
 
     # Expect the first result to contain the text "Pytest"
     expect(first_result).to_have_text(re.compile("Pytest With Eric"))
+
+    # Make sure to close, so that videos are saved.
+    context.close()
 
 
 @pytest.mark.login
@@ -56,3 +63,6 @@ def test_login(page: Page):
 
     # Look for a Logout Button
     expect(page.get_by_text(re.compile("Log out"))).to_be_visible()
+
+    # Take screenshot
+    page.screenshot(path="screenshot.png")
